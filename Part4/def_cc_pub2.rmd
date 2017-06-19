@@ -3,8 +3,8 @@ title: "Predicting Default of Credit Card Holders Using Additional Data"
 author: "Valerii Podymov"
 date: "June 18, 2017"
 output:
-  pdf_document: default
   html_document: default
+  pdf_document: default
 ---
 
 ```{r global_options, include=FALSE}
@@ -125,7 +125,7 @@ abline(v = median(cc_4$experience), col = "red")
 ```
 
 
-As it shown on the histograms above, all the call centres are different in terms of the median values (red vertical lines) of the experience measured in weeks from the hire date. 
+As it shown on the histograms above, all the call centres are different in terms of the median values (red vertical lines) of the personnel experience measured in the number of weeks from the hire date. 
 
 We can demonstrate that the values of `agent_id`, `supervisor_id`, `call_centre_id` variables in the `ag_df` data set reflect the certain hirachy. 
 
@@ -170,7 +170,13 @@ deb_cc_dummied <- dummy.data.frame(deb_cc,
 deb_cc_agg <- aggregate(.~ debtor_id, deb_cc_dummied, sum)
 ```
 
-Data frame `deb_cc_agg` has `r dim(deb_cc_agg)[1]` observations, same as `cc_count` data frame. That means data in `deb_cc_agg` are clean. 
+Data frame `deb_cc_agg` has `r dim(deb_cc_agg)[1]` observations, same as `cc_count` data frame. The `call_centre_id` was transformed to four variables `call_centre_id1`...`call_centre_id4`. 
+
+```{r}
+head(deb_cc_agg)
+```
+
+Each of them shows a number of times the certain debtor was contacted by each call centre, so now data in `deb_cc_agg` are clean. 
 
 Then we merge `raw_df` and `deb_cc_agg` data frames by inner join to avoid N/A values for `debtor_id`s not covered by calls. 
 
@@ -211,7 +217,7 @@ dummied_df <- dummy.data.frame(clean_df,
 ```
 
 
-## Building a Model
+## Building Models
 
 Let's split the `dummied_df` data frame to training and testing subsets. 
 
@@ -275,7 +281,7 @@ plot(importance_nn, main = 'Feature importance for AvgNN')
 ```
 
 
-## Comparing the Models
+## Results
 
 ```{r}
 models <- resamples(list(RF = fit_rf,
@@ -287,7 +293,7 @@ dotplot(models)
 
 As a result of using aditional data sets we were able to improve the old models by accuracy (RF: `r confMat_rf$overall[1]`; AvgNN: `r confMat_nn$overall[1]`) and expected out-of-sample error rate (Kappa: `r confMat_rf$overall[2]` and `r confMat_nn$overall[2]` respectively). 
 
-We can conclude that the information on the phone calls placed by agents is important to predict an outcome. The new models take into account the call centres IDs assuming that this kind of feature consolidates all the factors influencing the call centres performance and not fully represented in the available data sets. 
+We can conclude that the information on the phone calls placed by agents is important to predict an outcome. The new models take into account the call centres IDs assuming that this kind of feature consolidates all the factors influencing the call centres performance and not fully represented in the currently available data sets. More than this, we kept the complexity of the models at almost the same level. 
 
 
 ## Acknowledgements
